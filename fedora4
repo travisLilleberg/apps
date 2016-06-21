@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls Fedora Repository 4
+
+# Settings/Vars
+v="4.5.1"
+fed_name="fedora4" #This will be the ending of the url
+tomcat_location="/Library/Tomcat"
+data_dir="/mnt/fcrepo4-data"
+
+
+# Checks
+if [ ! -d ${tomcat_location}/webapps ]; then
+  echo -e "\nCould not find the place to put the file. ${tomcat_location} doesn't exist.\n"
+  exit 1
+fi
+
+
+# Uninstall Fedora
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  ${tomcat_location}/bin/shutdown.sh
+  rm -r ${tomcat_location}/webapps/${fed_name}
+  rm ${tomcat_location}/webapps/${fed_name}.war
+  sed -i .bak '/\fcrepo/d' ${HOME}/.bash_profile
+  rm ${data_dir}
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+
+# Install Fedora
+${tomcat_location}/bin/shutdown.sh
+curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
+mv ${fed_name}.war ${tomcat_location}/webapps
+echo -e "\n#Fedora 4 (fcrepo) settings" >> ${HOME}/.bash_profile
+echo "JAVA_OPTS=\"${JAVA_OPTS} -Dfcrepo.home=${data_dir}\"" >> ${HOME}/.bash_profile
+${tomcat_location}/bin/startup.sh
+
