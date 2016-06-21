@@ -3,6 +3,9 @@
 #@file
 #Installs/Uninstalls Fedora Repository 4
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Settings/Vars
 v="4.5.1"
 fed_name="fedora4" #This will be the ending of the url
@@ -12,18 +15,18 @@ data_dir="${HOME}/.fedora4-data" #The data directory where caching and junk is s
 
 # Checks
 if [ ! -d ${tomcat_location}/webapps ]; then
-  echo -e "\nCould not find the place to put the file. ${tomcat_location} doesn't exist.\n"
+  bad_msg "Could not find the place to put the file. ${tomcat_location} doesn't exist."
   exit 1
 fi
 
 
 # Uninstall Fedora
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling Fedora\n"
+  good_msg "Uninstalling Fedora"
 
   # Check if tomcat is running and if so, stop it.
   if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-    ${tomcat_location}/bin/shutdown.sh
+    tc stop
     sleep 2
   fi
 
@@ -42,11 +45,11 @@ fi
 
 
 # Install Fedora
-echo -e "\nInstalling Fedora\n"
+good_msg "Installing Fedora"
 
 # Checks if tomcat is already running, and if so turns it off.
 if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-  ${tomcat_location}/bin/shutdown.sh
+  tc stop
   sleep 2
 fi
 
@@ -57,5 +60,5 @@ mv ${fed_name}.war ${tomcat_location}/webapps
 mkdir ${data_dir}
 echo 'JAVA_OPTS="${JAVA_OPTS} -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
 
-${tomcat_location}/bin/startup.sh
+tc start
 
