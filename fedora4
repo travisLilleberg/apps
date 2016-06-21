@@ -7,7 +7,7 @@
 v="4.5.1"
 fed_name="fedora4" #This will be the ending of the url
 tomcat_location="/Library/Tomcat"
-data_dir="/mnt/fcrepo4-data"
+data_dir="${HOME}/.fedora4-data" #The data directory where caching and junk is stored.
 
 
 # Checks
@@ -19,11 +19,20 @@ fi
 
 # Uninstall Fedora
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  ${tomcat_location}/bin/shutdown.sh
+  echo -e "\nUninstalling Fedora\n"
+
+  # Check if tomcat is running and if so, stop it.
+  if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+    ${tomcat_location}/bin/shutdown.sh
+    sleep 2
+  fi
+
   rm -r ${tomcat_location}/webapps/${fed_name}
   rm ${tomcat_location}/webapps/${fed_name}.war
-  sed -i .bak '/\fcrepo/d' ${HOME}/.bash_profile
-  rm ${data_dir}
+
+  #Remove the data directory
+  rm -r ${data_dir}
+  sed -i .bak '/fedora4-data/d' ${tomcat_location}/bin/setenv.sh
 
   # If destroying, stop here.
   if [ "${1}" == "destroy" ]; then
@@ -33,10 +42,20 @@ fi
 
 
 # Install Fedora
-${tomcat_location}/bin/shutdown.sh
+echo -e "\nInstalling Fedora\n"
+
+# Checks if tomcat is already running, and if so turns it off.
+if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+  ${tomcat_location}/bin/shutdown.sh
+  sleep 2
+fi
+
 curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
 mv ${fed_name}.war ${tomcat_location}/webapps
-echo -e "\n#Fedora 4 (fcrepo) settings" >> ${HOME}/.bash_profile
-echo "JAVA_OPTS=\"${JAVA_OPTS} -Dfcrepo.home=${data_dir}\"" >> ${HOME}/.bash_profile
+
+# Set up the data directory
+mkdir ${data_dir}
+echo 'JAVA_OPTS="${JAVA_OPTS} -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
+
 ${tomcat_location}/bin/startup.sh
 

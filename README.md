@@ -16,4 +16,5 @@ First thing you should do is edit the script and see if there are any variables 
 ### Apps included:
 
 * Tomcat (Choose your version by editing script. Default 7.0.70.)
+  * Fedora Repository 4 (Default version 4.5.1. Installed on Tomcat.)
 
