@@ -3,9 +3,12 @@
 #@file
 #Installs/uninstalls Tomcat
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Checks
 if [ -z $(which java) ]; then
-  echo -e "\nYou need to install Java!\n"
+  bad_msg "You need to install Java!"
   exit 1
 fi
 
@@ -18,7 +21,7 @@ t_file="${t_dir}.tar.gz"
 
 # Uninstall Tomcat
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling Tomcat.\n"
+  good_msg "Uninstalling Tomcat."
 
   # Turn it off, in case it's running.
   /Library/Tomcat/bin/shutdown.sh
@@ -34,7 +37,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install Tomcat
-echo -e "\nInstalling Tomcat v${v}.\n"
+good_msg "Installing Tomcat v${v}."
 
 target_url="http://apache.mirrors.lucidnetworks.net/tomcat/tomcat-${major_v}/v${v}/bin/${t_file}"
 curl -OL ${target_url}
