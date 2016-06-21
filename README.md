@@ -5,8 +5,7 @@ It has only been tested on 10.10. You may need to modify the scripts slightly.
 
 ### Usage
 
-This is a collection of scripts that install/uninstall apps specifically on OSX.
-It has only been tested on 10.10. You may need to modify the scripts slightly.
+First thing you should do is edit the script and see if there are any variables you need to fill in.
 
 **Install:** Just run the script
 
