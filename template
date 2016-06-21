@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls ____
+
+# Checks
+
+# Settings/Vars
+
+# Uninstall ___
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+# Install ___
+
