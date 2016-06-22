@@ -19,16 +19,16 @@ if [ ! -d ${tomcat_location}/webapps ]; then
   exit 1
 fi
 
+# Check if tomcat is running and if so, stop it.
+if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+  tc stop
+  sleep 2
+fi
+
 
 # Uninstall Fedora
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
   good_msg "Uninstalling Fedora"
-
-  # Check if tomcat is running and if so, stop it.
-  if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-    tc stop
-    sleep 2
-  fi
 
   rm -r ${tomcat_location}/webapps/${fed_name}
   rm ${tomcat_location}/webapps/${fed_name}.war
