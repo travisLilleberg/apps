@@ -104,5 +104,6 @@ rm ${filename}.tgz
 rm -r ${filename}
 
 # Start it UP
+cd ${tomcat_location}/logs
 ${tomcat_location}/bin/startup.sh
 

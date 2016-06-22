@@ -50,5 +50,7 @@ mv ${fed_name}.war ${tomcat_location}/webapps
 mkdir ${data_dir}
 echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
 
+# Move to logs directory before starting because some libs just dump their logs in pwd
+cd ${tomcat_location}/logs
 ${tomcat_location}/bin/startup.sh
 
