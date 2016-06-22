@@ -20,8 +20,10 @@ t_file="${t_dir}.tar.gz"
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
   echo -e "\nUninstalling Tomcat.\n"
 
-  # Turn it off, in case it's running.
-  /Library/Tomcat/bin/shutdown.sh
+  # Checks if tomcat is already running, and if so turns it off.
+  if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+    /Library/Tomcat/bin/shutdown.sh
+  fi
 
   # Remove all the things!
   sudo rm /Library/Tomcat
@@ -44,4 +46,6 @@ rm ${t_file}
 sudo ln -s /usr/local/${t_dir} /Library/Tomcat
 sudo chown -R $(whoami) /Library/Tomcat
 sudo chmod +x /Library/Tomcat/bin/*.sh
+
+/Library/Tomcat/bin/startup.sh
 

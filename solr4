@@ -1,0 +1,108 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls Solr 4
+
+# ** IMPORTANT ** 
+# This script only works for Solr 4.3 - 4.10
+
+
+# Settings/Vars
+minor_v="10.4"
+v=4.${minor_v}
+filename="solr-${v}"
+tomcat_location="/Library/Tomcat"
+solr_home="${tomcat_location}/solr"
+solr_libs="${tomcat_location}/lib/solr_libs"
+
+# Checks
+if [ ! -d ${tomcat_location}/webapps ]; then
+  echo -e "\nCould not find the place to put the file. ${tomcat_location} doesn't exist.\n"
+  exit 1
+fi
+
+# Checks if tomcat is already running, and if so turns it off.
+if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+  ${tomcat_location}/bin/shutdown.sh
+  sleep 2
+fi
+
+
+# Uninstall
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  echo -e "\nUninstalling Solr 4.\n"
+
+  # Remove all the libraries
+  for solr_file in ${solr_libs}/*
+  do
+    just_filename=${solr_file##*/}
+    if [ -h "${tomcat_location}/lib/${just_filename}" ]; then
+      rm ${tomcat_location}/lib/${just_filename}
+    fi
+  done
+  rm -r ${solr_libs}
+
+  # Remove the webapp
+  rm ${tomcat_location}/webapps/solr.war
+  rm -r ${tomcat_location}/webapps/solr
+
+  # Removing solr home
+  rm -r ${solr_home}
+  sed -i '' '/solr/d' ${tomcat_location}/bin/setenv.sh
+  rm ${tomcat_location}/logs/solr.log
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+# Install
+echo -e "\nInstalling Solr 4.\n"
+
+# Get the files
+curl -OL https://archive.apache.org/dist/lucene/solr/${v}/${filename}.tgz
+tar -xvf ${filename}.tgz
+
+# Add all the libraries
+mkdir ${solr_libs}
+cp ${filename}/example/lib/ext/* ${solr_libs}
+cp ${filename}/example/resources/* ${solr_libs}
+for solr_file in ${solr_libs}/*
+do
+  just_filename=${solr_file##*/}
+  ln -s ${solr_file} ${tomcat_location}/lib/${just_filename}
+done
+
+# Tell solr to store its log in the ${tomcat_location}/logs dir
+sed -i '' "s:solr.log=logs/:solr.log=${tomcat_location}/logs/:g" ${solr_libs}/log4j.properties
+
+# Add the libraries from contrib and dist
+cp -r ${filename}/contrib ${solr_libs}
+cp -r ${filename}/dist ${solr_libs}
+echo 'JAVA_OPTS="$JAVA_OPTS -Dsolr.install.dir='${solr_libs}'"' >> ${tomcat_location}/bin/setenv.sh
+
+# Add the war
+cp ${filename}/dist/${filename}.war ${tomcat_location}/webapps/solr.war
+
+# Add solr home
+mkdir ${solr_home}
+cp -r ${filename}/example/solr/collection1/conf ${solr_home}/example_conf
+echo '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>' > ${solr_home}/solr.xml
+echo '<solr><solrcloud/></solr>' >> ${solr_home}/solr.xml
+echo 'JAVA_OPTS="$JAVA_OPTS -Dsolr.solr.home='${solr_home}'"' >> ${tomcat_location}/bin/setenv.sh
+
+echo "This setup is designed to be as minimal as possible.
+1. Create a new directory in ${solr_home} named whatever you want.
+2. Copy example_conf as 'conf' into your new directory.
+3. Create an empty core.properties file in your new directory.
+4. Restart Solr or refresh cores however you want.
+" > ${solr_home}/travis_readme
+
+# Remove cruft
+rm ${filename}.tgz
+rm -r ${filename}
+
+# Start it UP
+${tomcat_location}/bin/startup.sh
+

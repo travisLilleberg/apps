@@ -16,16 +16,15 @@ if [ ! -d ${tomcat_location}/webapps ]; then
   exit 1
 fi
 
+# Checks if tomcat is already running, and if so turns it off.
+if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+  ${tomcat_location}/bin/shutdown.sh
+  sleep 2
+fi
 
 # Uninstall Fedora
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
   echo -e "\nUninstalling Fedora\n"
-
-  # Check if tomcat is running and if so, stop it.
-  if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-    ${tomcat_location}/bin/shutdown.sh
-    sleep 2
-  fi
 
   rm -r ${tomcat_location}/webapps/${fed_name}
   rm ${tomcat_location}/webapps/${fed_name}.war
@@ -44,18 +43,12 @@ fi
 # Install Fedora
 echo -e "\nInstalling Fedora\n"
 
-# Checks if tomcat is already running, and if so turns it off.
-if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-  ${tomcat_location}/bin/shutdown.sh
-  sleep 2
-fi
-
 curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
 mv ${fed_name}.war ${tomcat_location}/webapps
 
 # Set up the data directory
 mkdir ${data_dir}
-echo 'JAVA_OPTS="${JAVA_OPTS} -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
+echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
 
 ${tomcat_location}/bin/startup.sh
 
