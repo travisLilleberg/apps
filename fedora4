@@ -31,7 +31,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 
   #Remove the data directory
   rm -r ${data_dir}
-  sed -i .bak '/fedora4-data/d' ${tomcat_location}/bin/setenv.sh
+  sed -i '' '/fedora4-data/d' ${tomcat_location}/bin/setenv.sh
 
   # If destroying, stop here.
   if [ "${1}" == "destroy" ]; then
