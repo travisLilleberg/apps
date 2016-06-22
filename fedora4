@@ -41,7 +41,7 @@ fi
 
 
 # Install Fedora
-echo -e "\nInstalling Fedora\n"
+echo -e "\nInstalling Fedora 4\n"
 
 curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
 mv ${fed_name}.war ${tomcat_location}/webapps
