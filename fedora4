@@ -47,12 +47,6 @@ fi
 # Install Fedora
 good_msg "Installing Fedora"
 
-# Checks if tomcat is already running, and if so turns it off.
-if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-  tc stop
-  sleep 2
-fi
-
 curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
 mv ${fed_name}.war ${tomcat_location}/webapps
 
