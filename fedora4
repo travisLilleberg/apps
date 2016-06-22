@@ -45,7 +45,7 @@ fi
 
 
 # Install Fedora
-good_msg "Installing Fedora"
+good_msg "Installing Fedora 4"
 
 curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
 mv ${fed_name}.war ${tomcat_location}/webapps
