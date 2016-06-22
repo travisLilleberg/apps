@@ -18,16 +18,19 @@ minor_v="0.70"
 v="${major_v}.${minor_v}"
 t_dir="apache-tomcat-${v}"
 t_file="${t_dir}.tar.gz"
+tomcat_location="/Library/Tomcat"
 
 # Uninstall Tomcat
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
   good_msg "Uninstalling Tomcat."
 
-  # Turn it off, in case it's running.
-  /Library/Tomcat/bin/shutdown.sh
+  # Checks if tomcat is already running, and if so turns it off.
+  if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+    tc stop
+  fi
 
   # Remove all the things!
-  sudo rm /Library/Tomcat
+  sudo rm ${tomcat_location}
   rm -r /usr/local/${t_dir}
 
   # If destroying, stop here.
@@ -44,7 +47,9 @@ curl -OL ${target_url}
 tar -xvf ${t_file}
 mv ${t_dir} /usr/local
 rm ${t_file}
-sudo ln -s /usr/local/${t_dir} /Library/Tomcat
-sudo chown -R $(whoami) /Library/Tomcat
-sudo chmod +x /Library/Tomcat/bin/*.sh
+sudo ln -s /usr/local/${t_dir} ${tomcat_location}
+sudo chown -R $(whoami) ${tomcat_location}
+sudo chmod +x ${tomcat_location}/bin/*.sh
+
+tc start
 

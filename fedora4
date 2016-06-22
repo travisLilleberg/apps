@@ -52,7 +52,8 @@ mv ${fed_name}.war ${tomcat_location}/webapps
 
 # Set up the data directory
 mkdir ${data_dir}
-echo 'JAVA_OPTS="${JAVA_OPTS} -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
+echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
 
+# Fire it up!
 tc start
 
