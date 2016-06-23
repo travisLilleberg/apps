@@ -20,7 +20,7 @@ if [ ! -d ${tomcat_location}/webapps ]; then
 fi
 
 # Check if tomcat is running and if so, stop it.
-if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
+if [ $(tc running) -eq 1 ]; then
   tc stop
   sleep 2
 fi
