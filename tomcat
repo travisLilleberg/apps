@@ -47,6 +47,7 @@ rm ${t_file}
 sudo ln -s /usr/local/${t_dir} ${tomcat_location}
 sudo chown -R $(whoami) ${tomcat_location}
 sudo chmod +x ${tomcat_location}/bin/*.sh
+echo 'CATALINA_PID=${HOME}/.tomcat_pid' >> ${tomcat_location}/bin/setenv.sh
 
 # Move to logs directory before starting because some libs just dump their logs in pwd
 cd ${tomcat_location}/logs
