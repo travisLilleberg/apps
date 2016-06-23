@@ -22,7 +22,7 @@ fi
 # Check if tomcat is running and if so, stop it.
 if [ $(tc running) -eq 1 ]; then
   tc stop
-  sleep 2
+  sleep 1
 fi
 
 
