@@ -24,7 +24,7 @@ fi
 # Checks if tomcat is already running, and if so turns it off.
 if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
   ${tomcat_location}/bin/shutdown.sh
-  sleep 2
+  sleep 1
 fi
 
 
