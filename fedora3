@@ -12,6 +12,10 @@
 # This setup does not support SSL
 
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
+
 # Settings/Vars
 v="3.8.1"
 filename="fcrepo-installer-${v}.jar"
@@ -21,20 +25,20 @@ fedora_location="${tomcat_location}/fedora3"
 
 # Checks
 if [ ! -d ${tomcat_location}/webapps ]; then
-  echo -e "\nCould not find the place to put the file. ${tomcat_location} doesn't exist.\n"
+  bad_msg "Could not find the place to put the file. ${tomcat_location} doesn't exist."
   exit 1
 fi
 
 # Checks if tomcat is already running, and if so turns it off.
 if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-  ${tomcat_location}/bin/shutdown.sh
+  tc stop
   sleep 2
 fi
 
 
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling Fedora 3\n"
+  good_msg "Uninstalling Fedora 3"
 
   # Remove the environment vars
   sed -i .bak '/fd3/d' ${HOME}/.bash_profile
@@ -59,14 +63,14 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling Fedora 3\n"
+good_msg "Installing Fedora 3"
 
 # Get the installer
 curl -OL http://downloads.sourceforge.net/fedora-commons/${filename}
 java -jar ${filename} config/install.properties
 
 # Add some environment variables
-if [ -z "${FEDORA_HOME}" ]; then
+if [ -z "${FEDORA_HOME}" ] || [ "${1}" == "rebuild" ]; then
   echo "# Fedora 3 Stuff (fd3)" >> ${HOME}/.bash_profile
   echo "export CATALINA_HOME=${tomcat_location} #(fd3)" >> ${HOME}/.bash_profile
   echo 'export FEDORA_HOME=$CATALINA_HOME/fedora3 #(fd3)' >> ${HOME}/.bash_profile
@@ -77,8 +81,7 @@ fi
 rm ${filename}
 
 # Start it up
-cd ${tomcat_location}/logs
-${tomcat_location}/bin/startup.sh
+tc start
 
 echo -e "\nYou probably need to close and reopen your terminal, or source your .bash_profile\n"
 
