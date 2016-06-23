@@ -71,7 +71,7 @@ mkdir ${solr_libs}
 cp ${filename}/example/lib/ext/* ${solr_libs}
 cp ${filename}/example/resources/* ${solr_libs}
 
-if [ $(confirm_msg "Do you want ICU analyzers?") == "y" ]; then
+if [ $(confirm_msg "Do you want ICU analyzers? [yN]") == "y" ]; then
   good_msg "Copying ICU analyzers"
   cp ${filename}/contrib/analysis-extras/lib/icu* ${solr_libs}
   cp ${filename}/contrib/analysis-extras/lucene-libs/lucene-analyzers-icu* ${solr_libs}
