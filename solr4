@@ -64,17 +64,31 @@ good_msg "Installing Solr 4."
 
 # Get the files
 curl -OL https://archive.apache.org/dist/lucene/solr/${v}/${filename}.tgz
-tar -xvf ${filename}.tgz
+tar -xf ${filename}.tgz
+
+# Add solr home
+mkdir ${solr_home}
+cp -r ${filename}/example/solr/collection1/conf ${solr_home}/example_conf
+echo '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>' > ${solr_home}/solr.xml
+echo '<solr><solrcloud/></solr>' >> ${solr_home}/solr.xml
+echo 'JAVA_OPTS="$JAVA_OPTS -Dsolr.solr.home='${solr_home}'"' >> ${tomcat_location}/bin/setenv.sh
+
+echo "This setup is designed to be as minimal as possible.
+1. Create a new directory in ${solr_home} named whatever you want.
+2. Copy example_conf as 'conf' into your new directory.
+3. Create an empty core.properties file in your new directory.
+4. Restart Solr or refresh cores however you want.
+" > ${solr_home}/travis_readme
 
 # Add all the libraries
 mkdir ${solr_libs}
 cp ${filename}/example/lib/ext/* ${solr_libs}
 cp ${filename}/example/resources/* ${solr_libs}
 
-if [ $(confirm_msg "Do you want ICU analyzers? [yN]") == "y" ]; then
-  good_msg "Copying ICU analyzers"
-  cp ${filename}/contrib/analysis-extras/lib/icu* ${solr_libs}
-  cp ${filename}/contrib/analysis-extras/lucene-libs/lucene-analyzers-icu* ${solr_libs}
+if [ $(confirm_msg "Do you want the contributed libraries? [yN]") == "y" ]; then
+  good_msg "Copying contribs"
+  mkdir ${solr_home}/lib
+  cp -r ${filename}/contrib ${solr_home}/lib
 fi
 
 for solr_file in ${solr_libs}/*
@@ -93,20 +107,6 @@ echo 'JAVA_OPTS="$JAVA_OPTS -Dsolr.install.dir='${solr_libs}'"' >> ${tomcat_loca
 
 # Add the war
 cp ${filename}/dist/${filename}.war ${tomcat_location}/webapps/solr.war
-
-# Add solr home
-mkdir ${solr_home}
-cp -r ${filename}/example/solr/collection1/conf ${solr_home}/example_conf
-echo '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>' > ${solr_home}/solr.xml
-echo '<solr><solrcloud/></solr>' >> ${solr_home}/solr.xml
-echo 'JAVA_OPTS="$JAVA_OPTS -Dsolr.solr.home='${solr_home}'"' >> ${tomcat_location}/bin/setenv.sh
-
-echo "This setup is designed to be as minimal as possible.
-1. Create a new directory in ${solr_home} named whatever you want.
-2. Copy example_conf as 'conf' into your new directory.
-3. Create an empty core.properties file in your new directory.
-4. Restart Solr or refresh cores however you want.
-" > ${solr_home}/travis_readme
 
 # Remove cruft
 rm ${filename}.tgz
