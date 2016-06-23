@@ -69,7 +69,7 @@ mkdir ${solr_libs}
 cp ${filename}/example/lib/ext/* ${solr_libs}
 cp ${filename}/example/resources/* ${solr_libs}
 
-read -p "Do you want ICU analyzers?" yn
+read -p "Do you want ICU analyzers? [yN]" yn
 if [ "${yn}" == "y" ]; then
   echo -e "\nCopying ICU analyzers"
   cp ${filename}/contrib/analysis-extras/lib/icu* ${solr_libs}
