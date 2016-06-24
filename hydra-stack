@@ -10,13 +10,16 @@ apps=${PWD}
 
 # Install
 ${apps}/rvm
+sleep 2
 ${apps}/tomcat
+sleep 2
 ${apps}/fedora3
+sleep 2
 ${apps}/solr4
-
+sleep 2
 if [ -z $(which brew) ]; then
   ${apps}/homebrew
+  sleep 2
 fi
-
 ${apps}/mysql
 
