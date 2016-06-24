@@ -22,8 +22,12 @@ apps=${PWD}
 
 # Install
 ${apps}/redis
+sleep 2
 ${apps}/imagemagick
+sleep 2
 ${apps}/ffmpeg
+sleep 2
 ${apps}/ghostscript
+sleep 2
 ${apps}/phantomjs
 
