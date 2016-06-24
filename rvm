@@ -3,6 +3,9 @@
 #@file
 #Installs/Uninstalls RVM
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
   # Uninstall all gems on all rubies, then uninstall the rubies.
@@ -11,10 +14,10 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
     if [[ "${rubyv}" =~ [[:digit:]]\.[[:digit:]]+\.?[[:digit:]]* ]]; then
       rvm use ${BASH_REMATCH}
       if [ ${?} == 0 ]; then
-        echo -e "\nUninstalling all Gems on Ruby ${BASH_REMATCH}\n"
+        good_msg "Uninstalling all Gems on Ruby ${BASH_REMATCH}"
         gem uninstall -x --force --all
         gem cleanup
-        echo -e "\nUninstalling Ruby ${BASH_REMATCH}\n"
+        good_msg "Uninstalling Ruby ${BASH_REMATCH}"
         rvm uninstall ${BASH_REMATCH}
       fi
     fi
@@ -22,7 +25,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 
   rvm cleanup all
 
-  echo -e "\nUninstalling RVM\n"
+  good_msg "Uninstalling RVM"
   rvm implode
   sed -i .bak '/\.rvm/d' ${HOME}/.bash_profile
   sed -i .bak '/\.rvm/d' ${HOME}/.bashrc
@@ -36,7 +39,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling RVM\n"
+good_msg "Installing RVM"
 
 \curl -L https://get.rvm.io | bash -s stable --auto-dotfiles
 
