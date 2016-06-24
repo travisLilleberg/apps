@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls RVM, Tomcat, Fedora3, Solr4, MySQL
+
+# Settings/Vars
+apps=${PWD}
+
+# No uninstall option. Mass uninstallation makes me itchy.
+
+# Install
+${apps}/rvm
+${apps}/tomcat
+${apps}/fedora3
+${apps}/solr4
+
+if [ -z $(which brew) ]; then
+  ${apps}/homebrew
+fi
+
+${apps}/mysql
+
