@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls ImageMagick, FFmpeg, GhostScript, Redis, PhantomJS
+
+# Checks
+read -p "Did you install the hydra-stack first? [yN] " yn
+if [ "${yn}" != "y" ]; then
+  echo -e "\nInstall the hydra stack first, then get back to me.\n"
+  exit 1
+fi
+
+if [ -z $(which brew) ]; then
+  echo -e "\nLIAR. Install the hydra stack!\n"
+  exit 1
+fi
+
+# Settings/Vars
+apps=${PWD}
+
+# No uninstall option. Mass uninstallation makes me itchy.
+
+# Install
+${apps}/redis
+${apps}/imagemagick
+${apps}/ffmpeg
+${apps}/ghostscript
+${apps}/phantomjs
+
