@@ -3,6 +3,9 @@
 #@file
 #Installs/Uninstalls FFmpeg
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Checks
 if [ -z $(which brew) ]; then
   bad_msg "You need to install Homebrew first."
