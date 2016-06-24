@@ -8,7 +8,7 @@ source ${HOME}/.bash_functions/msgs
 
 # Checks
 if [ -z $(which brew) ]; then
-  echo -e "\nYou need to install Homebrew first.\n"
+  bad_msg "\nYou need to install Homebrew first.\n"
   exit 1
 fi
 
