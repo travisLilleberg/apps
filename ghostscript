@@ -3,6 +3,9 @@
 #@file
 #Installs/Uninstalls GhostScript
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Checks
 if [ -z $(which brew) ]; then
   echo -e "\nYou need to install Homebrew first.\n"
@@ -11,7 +14,7 @@ fi
 
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling GhostScript\n"
+  good_msg "Uninstalling GhostScript"
   brew rmtree ghostscript
 
   # If destroying, stop here.
@@ -21,6 +24,6 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling GhostScript\n"
+good_msg "Installing GhostScript"
 brew install ghostscript
 
