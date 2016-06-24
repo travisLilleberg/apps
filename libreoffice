@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls LibreOffice
+
+# Checks
+if [ -z $(which brew) ]; then
+  echo -e "\nYou need to install Homebrew first.\n"
+  exit 1
+fi
+
+# Settings/Vars
+
+# Uninstall
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  echo -e "\nUninstalling LibreOffice.\n"
+
+  brew cask uninstall libreoffice
+
+  # Remove the environment vars
+  #sed -i .bak '/trove/d' ${HOME}/.bash_profile
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+# Install
+brew cask install libreoffice
+#echo "# LibreOffice (for trove)" >> ${HOME}/.bash_profile
+#echo 'export PATH=$PATH:'${HOME}'/Applications/LibreOffice.app/Contents/MacOS #(trove)' >> ${HOME}/.bash_profile
+

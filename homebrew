@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls Homebrew
+
+# Checks
+
+# Settings/Vars
+
+# Uninstall
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  echo -e "Uninstalling Homebrew"
+
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall)"
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+# Install
+echo -e "Installing Homebrew"
+
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+# Rmtree is used in a lot of other scripts here to remove dependencies
+brew tap beeftornado/rmtree && brew install beeftornado/rmtree/brew-rmtree
+

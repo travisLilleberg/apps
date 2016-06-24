@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls ____
+
+# Checks
+
+# Settings/Vars
+PHJS_VERSION="2.1.1"
+PHJS_FILE="phantomjs-${PHJS_VERSION}-macosx"
+
+# Uninstall
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  echo -e "\nUninstalling PhantomJS\n"
+  rm /usr/local/bin/phantomjs
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+# Install
+echo -e "\nInstalling PhantomJS\n"
+
+curl -LO https://bitbucket.org/ariya/phantomjs/downloads/${PHJS_FILE}.zip
+unzip ${PHJS_FILE}.zip > /dev/null
+cp ${PHJS_FILE}/bin/phantomjs /usr/local/bin
+rm -r ${PHJS_FILE}*
+
