@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls GhostScript
+
+# Checks
+if [ -z $(which brew) ]; then
+  echo -e "\nYou need to install Homebrew first.\n"
+  exit 1
+fi
+
+# Uninstall
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  echo -e "\nUninstalling GhostScript\n"
+  brew rmtree ghostscript
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ] || [ ${?} -gt 0 ]; then
+    exit 0
+  fi
+fi
+
+# Install
+echo -e "\nInstalling GhostScript\n"
+brew install ghostscript
+
