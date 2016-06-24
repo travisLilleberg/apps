@@ -3,15 +3,18 @@
 #@file
 #Installs/Uninstalls Redis
 
+# Libs 
+source ${HOME}/.bash_functions/msgs
+
 # Checks
 if [ -z $(which brew) ]; then
-  echo -e "\nYou need to install Homebrew first.\n"
+  bad_msg "You need to install Homebrew first."
   exit 1
 fi
 
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling Redis.\n"
+  good_msg "Uninstalling Redis."
   brew rmtree redis
 
   # If destroying, stop here.
@@ -21,6 +24,6 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling Redis.\n"
+good_msg "Installing Redis."
 brew install redis
 
