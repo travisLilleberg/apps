@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls RVM
+
+# Uninstall
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  # Uninstall all gems on all rubies, then uninstall the rubies.
+  for rubyv in $(rvm list | grep "ruby-*")
+  do
+    if [[ "${rubyv}" =~ [[:digit:]]\.[[:digit:]]+\.?[[:digit:]]* ]]; then
+      rvm use ${BASH_REMATCH}
+      if [ ${?} == 0 ]; then
+        echo -e "\nUninstalling all Gems on Ruby ${BASH_REMATCH}\n"
+        gem uninstall -x --force --all
+        gem cleanup
+        echo -e "\nUninstalling Ruby ${BASH_REMATCH}\n"
+        rvm uninstall ${BASH_REMATCH}
+      fi
+    fi
+  done
+
+  rvm cleanup all
+
+  echo -e "\nUninstalling RVM\n"
+  rvm implode
+  sed -i .bak '/\.rvm/d' ${HOME}/.bash_profile
+  sed -i .bak '/\.rvm/d' ${HOME}/.bashrc
+  sed -i .bak '/\.rvm/d' ${HOME}/.zshrc
+  sed -i .bak '/\.rvm/d' ${HOME}/.zlogin
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+# Install
+echo -e "\nInstalling RVM\n"
+
+\curl -L https://get.rvm.io | bash -s stable --auto-dotfiles
+
+
