@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls Redis
+
+# Checks
+if [ -z $(which brew) ]; then
+  echo -e "\nYou need to install Homebrew first.\n"
+  exit 1
+fi
+
+# Uninstall
+if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
+  echo -e "\nUninstalling Redis.\n"
+  brew rmtree redis
+
+  # If destroying, stop here.
+  if [ "${1}" == "destroy" ]; then
+    exit 0
+  fi
+fi
+
+# Install
+echo -e "\nInstalling Redis.\n"
+brew install redis
+
