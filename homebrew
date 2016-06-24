@@ -3,9 +3,12 @@
 #@file
 #Installs/Uninstalls Homebrew
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling Homebrew\n"
+  good_msg "Uninstalling Homebrew"
 
   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall)"
 
@@ -16,7 +19,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling Homebrew\n"
+good_msg "Installing Homebrew"
 
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 

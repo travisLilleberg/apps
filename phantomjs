@@ -3,13 +3,16 @@
 #@file
 #Installs/Uninstalls PhantomJS
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Settings/Vars
 PHJS_VERSION="2.1.1"
 PHJS_FILE="phantomjs-${PHJS_VERSION}-macosx"
 
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling PhantomJS\n"
+  good_msg "Uninstalling PhantomJS"
   rm /usr/local/bin/phantomjs
 
   # If destroying, stop here.
@@ -19,7 +22,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling PhantomJS\n"
+good_msg "Installing PhantomJS"
 
 curl -LO https://bitbucket.org/ariya/phantomjs/downloads/${PHJS_FILE}.zip
 unzip ${PHJS_FILE}.zip > /dev/null
