@@ -3,15 +3,17 @@
 #@file
 #Installs/Uninstalls ImageMagick, FFmpeg, GhostScript, Redis, PhantomJS
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Checks
-read -p "Did you install the hydra-stack first? [yN] " yn
-if [ "${yn}" != "y" ]; then
-  echo -e "\nInstall the hydra stack first, then get back to me.\n"
+if [ "$(confirm_msg 'Did you install the hydra-stack first? [yN] ')" != "y" ]; then
+  neutral_msg "Install the hydra stack first, then get back to me."
   exit 1
 fi
 
 if [ -z $(which brew) ]; then
-  echo -e "\nLIAR. Install the hydra stack!\n"
+  bad_msg "LIAR. Install the hydra stack!"
   exit 1
 fi
 
