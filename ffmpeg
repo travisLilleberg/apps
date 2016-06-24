@@ -5,13 +5,13 @@
 
 # Checks
 if [ -z $(which brew) ]; then
-  echo -e "\nYou need to install Homebrew first.\n"
+  bad_msg "You need to install Homebrew first."
   exit 1
 fi
 
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling FFmpeg.\n"
+  good_msg "Uninstalling FFmpeg."
   brew rmtree ffmpeg
 
   # If destroying, stop here.
@@ -21,6 +21,6 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling FFmpeg.\n"
+good_msg "Installing FFmpeg."
 brew install ffmpeg --with-libvpx --with-libvorbis
 
