@@ -3,15 +3,18 @@
 #@file
 #Installs/Uninstalls MySQL
 
+# Libs
+source ${HOME}/.bash_functions/msgs
+
 # Checks
 if [ -z $(which brew) ]; then
-  echo -e "\nYou need to install Homebrew first.\n"
+  bad_msg "You need to install Homebrew first."
   exit 1
 fi
 
 # Uninstall
 if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling MySQL.\n"
+  good_msg "Uninstalling MySQL."
   mysql.server stop
   brew rmtree mysql
   rm -r /usr/local/var/mysql
@@ -23,6 +26,6 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
 fi
 
 # Install
-echo -e "\nInstalling MySQL.\n"
+good_msg "Installing MySQL."
 brew install mysql
 
