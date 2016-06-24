@@ -1,9 +1,7 @@
 #!/bin/bash
 
 #@file
-#Installs/Uninstalls ____
-
-# Checks
+#Installs/Uninstalls PhantomJS
 
 # Settings/Vars
 PHJS_VERSION="2.1.1"
