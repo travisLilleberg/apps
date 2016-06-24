@@ -18,7 +18,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
   brew rmtree ghostscript
 
   # If destroying, stop here.
-  if [ "${1}" == "destroy" ] || [ ${?} -gt 0 ]; then
+  if [ "${1}" == "destroy" ]; then
     exit 0
   fi
 fi
