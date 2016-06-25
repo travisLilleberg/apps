@@ -16,11 +16,21 @@ need to fill in.
 
 ### Apps included:
 
+Indented points mean that one application is installed with or in another.
+
 * Tomcat (Choose your version by editing script. Default 7.0.70.)
-  * Fedora Repository 3 (Default version 3.8.1. Installed on Tomcat.)
+  * Fedora Repository 3 (Default version 3.8.1.)
     * Fedora 3 can already be quickly installed via the installer. Only use this if you want it on this Tomcat.
     * Older versions appear to be incompatible with Tomcat 7.0.70. Newer versions work.)
-  * Fedora Repository 4 (Default version 4.5.1. Installed on Tomcat.)
-  * Solr 4.3 - 4.10 (Default version 4.10.4. Installed on Tomcat)
-
+  * Fedora Repository 4 (Default version 4.5.1.)
+  * Solr 4.3 - 4.10 (Default version 4.10.4.)
+* Homebrew (All versions of programs below are whatever Homebrew gives us.)
+  * MySQL
+  * Redis
+  * ImageMagick
+  * FFmpeg
+  * LibreOffice
+  * GhostScript
+* RVM
+* PhantomJS (Default version 2.1.1.)
 
