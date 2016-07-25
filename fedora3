@@ -4,7 +4,7 @@
 #Installs/Uninstalls Fedora Repository 3
 
 # ** IMPORTANT **
-# After a while of trying to make older versions of Fedora3 work with Tomcat7, 
+# After a while of trying to make older versions of Fedora 3 work with Tomcat7, 
 # something appears to be incompatible and it's not worth figuring out what. Use
 # more recent versions.
 #
@@ -44,7 +44,7 @@ if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
   sed -i .bak '/fd3/d' ${HOME}/.bash_profile
 
   # Remove all the wars
-  wars=('fedora3' 'fedora-demo' 'fop' 'imagemanip' 'saxon')
+  wars=('fedora' 'fedora-demo' 'fop' 'imagemanip' 'saxon')
   for war_file in "${wars[@]}"
   do
     if [ -f ${tomcat_location}/webapps/${war_file}.war ]; then

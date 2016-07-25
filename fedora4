@@ -20,10 +20,8 @@ if [ ! -d ${tomcat_location}/webapps ]; then
 fi
 
 # Check if tomcat is running and if so, stop it.
-if [ $(tc running) -eq 1 ]; then
-  tc stop
-  sleep 1
-fi
+tc stop
+sleep 1
 
 
 # Uninstall Fedora
