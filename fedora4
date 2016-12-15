@@ -4,7 +4,7 @@
 #Installs/Uninstalls Fedora Repository 4
 
 # Settings/Vars
-v="4.5.1"
+v="4.6.0"
 fed_name="fedora4" #This will be the ending of the url
 tomcat_location="/Library/Tomcat"
 data_dir="${HOME}/.fedora4-data" #The data directory where caching and junk is stored.
