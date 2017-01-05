@@ -1,55 +1,105 @@
 #!/bin/bash
 
 #@file
-#Installs/uninstalls Tomcat
+#Manages Tomcat
 
-# Checks
-if [ -z $(which java) ]; then
-  echo -e "\nYou need to install Java!\n"
-  exit 1
-fi
+source ~/.bash_functions/msgs
+
 
 # Settings/Vars
 major_v="7" #Defaults to lastest version of 7
 minor_v="0.70"
 v="${major_v}.${minor_v}"
 t_dir="apache-tomcat-${v}"
-t_file="${t_dir}.tar.gz"
 tomcat_location="/Library/Tomcat"
+pid_file="${HOME}/.tomcat_pid"
 
-# Uninstall Tomcat
-if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling Tomcat.\n"
 
-  # Checks if tomcat is already running, and if so turns it off.
-  if [ ! -z "$(ps aux | grep tomcat | grep -v grep)" ]; then
-    ${tomcat_location}/bin/shutdown.sh
-  fi
-
-  # Remove all the things!
-  sudo rm ${tomcat_location}
-  rm -r /usr/local/${t_dir}
-
-  # If destroying, stop here.
-  if [ "${1}" == "destroy" ]; then
-    exit 0
-  fi
+# Checks
+if [ -z $(which java) ]; then
+  bad_msg "\nYou need to install Java!\n"
+  exit 1
 fi
 
-# Install Tomcat
-echo -e "\nInstalling Tomcat v${v}.\n"
 
-target_url="http://apache.mirrors.lucidnetworks.net/tomcat/tomcat-${major_v}/v${v}/bin/${t_file}"
-curl -OL ${target_url}
-tar -xvf ${t_file}
-mv ${t_dir} /usr/local
-rm ${t_file}
-sudo ln -s /usr/local/${t_dir} ${tomcat_location}
-sudo chown -R $(whoami) ${tomcat_location}
-sudo chmod +x ${tomcat_location}/bin/*.sh
-echo 'CATALINA_PID=${HOME}/.tomcat_pid' >> ${tomcat_location}/bin/setenv.sh
+# Goooo
+case "${1}" in
 
-# Move to logs directory before starting because some libs just dump their logs in pwd
-cd ${tomcat_location}/logs
-${tomcat_location}/bin/startup.sh
+  # Is Tomcat running?
+  'running')
+    if [ -f "${pid_file}" ]; then
+      echo 1
+    else
+      echo 0
+    fi
+    ;;
+
+  # Starting Tomcat
+  'start')
+    if [ $(./$0 running) -eq 0 ]; then
+      neutral_msg "Starting Tomcat"
+      cd ${tomcat_location}/logs
+      ${tomcat_location}/bin/startup.sh
+    fi
+    ;;
+
+  # Stopping Tomcat
+  'stop')
+    if [ $(./$0 running) -eq 1 ]; then
+      neutral_msg "Stopping Tomcat"
+      ${tomcat_location}/bin/shutdown.sh
+    fi
+    ;;
+
+  'restart')
+    ./$0 stop
+    sleep 5
+    ./$0 start
+    ;;
+
+  # Installing Tomcat
+  'install')
+    if [ -d "${t_dir}" ]; then
+      bad_msg "${t_dir} already exists!"
+      exit 1
+    fi
+
+    neutral_msg "Installing Tomcat v${v}."
+
+    t_file="${t_dir}.tar.gz"
+    target_url="http://archive.apache.org/dist/tomcat/tomcat-${major_v}/v${v}/bin/${t_file}"
+    curl -fOL ${target_url}
+    if [ ${?} -gt 0 ]; then
+      bad_msg "Failed to retrieve Tomcat from the web."
+      exit 1
+    fi
+
+    tar -xvf ${t_file}
+    mv ${t_dir} /usr/local
+    rm ${t_file}
+    sudo ln -s /usr/local/${t_dir} ${tomcat_location}
+
+    sudo chown -R $(whoami) ${tomcat_location}
+    sudo chmod +x ${tomcat_location}/bin/*.sh
+    echo "CATALINA_PID=${pid_file}" >> ${tomcat_location}/bin/setenv.sh
+
+    # Move to logs directory before starting because some libs just dump their logs in pwd.
+    ./$0 start
+    ;;
+
+  # Uninstalling Tomcat
+  'destroy')
+    neutral_msg "Uninstalling Tomcat."
+
+    ./$0 stop
+    sudo rm ${tomcat_location}
+    rm -r /usr/local/${t_dir}
+    ;;
+
+  'rebuild')
+    ./$0 destroy
+    sleep 5
+    ./$0 install
+    ;;
+esac
 
