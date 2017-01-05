@@ -7,10 +7,10 @@
 source ${HOME}/.bash_functions/msgs
 
 # Settings/Vars
-v="4.5.1"
+v="4.6.0"
 fed_name="fedora4" #This will be the ending of the url
 tomcat_location="/Library/Tomcat"
-data_dir="${HOME}/.fedora4-data" #The data directory where caching and junk is stored.
+data_dir="${tomcat_location}/.fedora4-data" #The data directory where caching and junk is stored.
 
 
 # Checks
@@ -50,7 +50,8 @@ mv ${fed_name}.war ${tomcat_location}/webapps
 
 # Set up the data directory
 mkdir ${data_dir}
-echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
+echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.modeshape.configuration=classpath:/config/minimal-default/repository.json -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
+
 
 # Fire it up!
 tc start

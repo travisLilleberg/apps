@@ -24,6 +24,7 @@ Indented points mean that one application is installed with or in another.
     * Older versions appear to be incompatible with Tomcat 7.0.70. Newer versions work.)
   * Fedora Repository 4 (Default version 4.5.1.)
   * Solr 4.3 - 4.10 (Default version 4.10.4.)
+* Solr 6
 * Homebrew (All versions of programs below are whatever Homebrew gives us.)
   * MySQL
   * Redis
