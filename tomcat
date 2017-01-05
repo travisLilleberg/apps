@@ -3,6 +3,8 @@
 #@file
 #Manages Tomcat
 
+source ~/.bash_functions/msgs
+
 
 # Settings/Vars
 major_v="7" #Defaults to lastest version of 7
@@ -15,7 +17,7 @@ pid_file="${HOME}/.tomcat_pid"
 
 # Checks
 if [ -z $(which java) ]; then
-  echo -e "\nYou need to install Java!\n"
+  bad_msg "\nYou need to install Java!\n"
   exit 1
 fi
 
@@ -35,7 +37,7 @@ case "${1}" in
   # Starting Tomcat
   'start')
     if [ $(./$0 running) -eq 0 ]; then
-      echo -e "\nStarting Tomcat\n"
+      neutral_msg "Starting Tomcat"
       cd ${tomcat_location}/logs
       ${tomcat_location}/bin/startup.sh
     fi
@@ -44,7 +46,7 @@ case "${1}" in
   # Stopping Tomcat
   'stop')
     if [ $(./$0 running) -eq 1 ]; then
-      echo -e "\nStopping Tomcat\n"
+      neutral_msg "Stopping Tomcat"
       ${tomcat_location}/bin/shutdown.sh
     fi
     ;;
@@ -58,17 +60,17 @@ case "${1}" in
   # Installing Tomcat
   'install')
     if [ -d "${t_dir}" ]; then
-      echo -e "\n${t_dir} already exists!\n"
+      bad_msg "${t_dir} already exists!"
       exit 1
     fi
 
-    echo -e "\nInstalling Tomcat v${v}.\n"
+    neutral_msg "Installing Tomcat v${v}."
 
     t_file="${t_dir}.tar.gz"
     target_url="http://archive.apache.org/dist/tomcat/tomcat-${major_v}/v${v}/bin/${t_file}"
     curl -fOL ${target_url}
     if [ ${?} -gt 0 ]; then
-      echo -e "\nFailed to retrieve Tomcat from the web.\n"
+      bad_msg "Failed to retrieve Tomcat from the web."
       exit 1
     fi
 
@@ -87,7 +89,7 @@ case "${1}" in
 
   # Uninstalling Tomcat
   'destroy')
-    echo -e "\nUninstalling Tomcat.\n"
+    neutral_msg "Uninstalling Tomcat."
 
     ./$0 stop
     sudo rm ${tomcat_location}
