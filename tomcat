@@ -34,7 +34,7 @@ case "${1}" in
 
   # Starting Tomcat
   'start')
-    if [ $(./$0 running) -eq 0 ]; then
+    if [ $($0 running) -eq 0 ]; then
       echo -e "\nStarting Tomcat\n"
       cd ${tomcat_location}/logs
       ${tomcat_location}/bin/startup.sh
@@ -43,16 +43,16 @@ case "${1}" in
 
   # Stopping Tomcat
   'stop')
-    if [ $(./$0 running) -eq 1 ]; then
+    if [ $($0 running) -eq 1 ]; then
       echo -e "\nStopping Tomcat\n"
       ${tomcat_location}/bin/shutdown.sh
     fi
     ;;
 
   'restart')
-    ./$0 stop
+    $0 stop
     sleep 3
-    ./$0 start
+    $0 start
     ;;
 
   # Installing Tomcat
@@ -82,22 +82,22 @@ case "${1}" in
     echo "CATALINA_PID=${pid_file}" >> ${tomcat_location}/bin/setenv.sh
 
     # Move to logs directory before starting because some libs just dump their logs in pwd.
-    ./$0 start
+    $0 start
     ;;
 
   # Uninstalling Tomcat
   'destroy')
     echo -e "\nUninstalling Tomcat.\n"
 
-    ./$0 stop
+    $0 stop
     sudo rm ${tomcat_location}
     rm -r /usr/local/${t_dir}
     ;;
 
   'rebuild')
-    ./$0 destroy
+    $0 destroy
     sleep 5
-    ./$0 install
+    $0 install
     ;;
 esac
 
