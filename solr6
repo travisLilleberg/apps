@@ -1,37 +1,88 @@
 #!/bin/bash
 
 #@file
-#Installs/Uninstalls Solr 6
+# Manages Solr 6
 
 # Settings/Vars
 minor_v="3.0"
 v=6.${minor_v}
 filename="solr-${v}"
 solr_home="/usr/local/solr"
+solr_script="${solr_home}/bin/solr"
+pid_file="${HOME}/.solr_pid"
 
-# Uninstall
-if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling Solr 6.\n"
+#Goooo
+case "${1}" in
 
-  ${solr_home}/bin/solr stop
-  rm -r ${solr_home}
+  # Is Solr running?
+  'running')
+    if [ -f "${pid_file}" ]; then
+      echo 1
+    else
+      echo 0
+    fi
+    ;;
 
-  # If destroying, stop here.
-  if [ "${1}" == "destroy" ]; then
-    exit 0
-  fi
-fi
+  'start')
+    if [ $($0 running) -eq 0 ]; then
+      echo -e "\nStarting Solr\n"
+      ${solr_script} start
+      echo "${!}" > ${pid_file}
+    fi
+    ;;
 
-# Install
-echo -e "\nInstalling Solr 6\n"
+  'stop')
+    if [ $($0 running) -eq 1 ]; then
+      echo -e "\nStopping Solr\n"
+      ${solr_script} stop
+      rm ${pid_file}
+    fi
+    ;;
 
-# Get the files
-curl -OL https://archive.apache.org/dist/lucene/solr/${v}/${filename}.tgz
-tar -xf ${filename}.tgz
+  'restart')
+    $0 stop
+    sleep 3
+    $0 start
+    ;;
 
-# Add solr home
-mv ${filename} ${solr_home}
+  'install')
+    if [ -d "${solr_home}" ]; then
+      echo -e "\n${solr_home} already exists!\n"
+      exit 1
+    fi
 
-# Remove cruft
-rm ${filename}.tgz
+    echo -e "\nInstalling Solr 6\n"
+
+    # Get the files
+    curl -fOL https://archive.apache.org/dist/lucene/solr/${v}/${filename}.tgz
+    if [ ${?} -gt 0 ]; then
+      echo -e "\nFailed to retrieve Solr from the web.\n"
+      exit 1
+    fi
+
+    tar -xf ${filename}.tgz
+
+    # Add solr home
+    mv ${filename} ${solr_home}
+
+    # Remove cruft
+    rm ${filename}.tgz
+
+    $0 start
+    ;;
+
+  'destroy')
+    echo -e "\nUninstalling Solr 6.\n"
+
+    $0 stop
+    rm -r ${solr_home}
+    ;;
+
+  'rebuild')
+    $0 destroy
+    sleep 3
+    $0 install
+    ;;
+
+esac
 

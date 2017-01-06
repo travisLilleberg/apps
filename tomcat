@@ -32,7 +32,6 @@ case "${1}" in
     fi
     ;;
 
-  # Starting Tomcat
   'start')
     if [ $($0 running) -eq 0 ]; then
       echo -e "\nStarting Tomcat\n"
@@ -41,7 +40,6 @@ case "${1}" in
     fi
     ;;
 
-  # Stopping Tomcat
   'stop')
     if [ $($0 running) -eq 1 ]; then
       echo -e "\nStopping Tomcat\n"
@@ -55,7 +53,6 @@ case "${1}" in
     $0 start
     ;;
 
-  # Installing Tomcat
   'install')
     if [ -d "${t_dir}" ]; then
       echo -e "\n${t_dir} already exists!\n"
@@ -81,11 +78,9 @@ case "${1}" in
     sudo chmod +x ${tomcat_location}/bin/*.sh
     echo "CATALINA_PID=${pid_file}" >> ${tomcat_location}/bin/setenv.sh
 
-    # Move to logs directory before starting because some libs just dump their logs in pwd.
     $0 start
     ;;
 
-  # Uninstalling Tomcat
   'destroy')
     echo -e "\nUninstalling Tomcat.\n"
 
