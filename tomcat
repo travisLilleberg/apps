@@ -3,7 +3,14 @@
 #@file
 #Manages Tomcat
 
-source ~/.bash_functions/msgs
+# Strappin that boot
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
 
 
 # Settings/Vars
@@ -11,8 +18,7 @@ major_v="7" #Defaults to lastest version of 7
 minor_v="0.70"
 v="${major_v}.${minor_v}"
 t_dir="apache-tomcat-${v}"
-tomcat_location="/Library/Tomcat"
-pid_file="${HOME}/.tomcat_pid"
+pid_file="${HOME}/.tomcat.pid"
 
 
 # Checks
@@ -83,17 +89,19 @@ case "${1}" in
     $0 start
     ;;
 
-  'destroy')
+  'uninstall')
     neutral_msg "Uninstalling Tomcat."
 
     $0 stop
+    sleep 3
+
     sudo rm ${tomcat_location}
     rm -r /usr/local/${t_dir}
     ;;
 
   'rebuild')
-    $0 destroy
-    sleep 5
+    $0 uninstall
+    sleep 3
     $0 install
     ;;
 esac
