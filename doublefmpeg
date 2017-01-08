@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#@file
+#Installs/Uninstalls FFmpeg
+
+# Boot that boot
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
+
+
+# Checks
+if [ -z $(which brew) ]; then
+  bad_msg "You need to install Homebrew first."
+  exit 1
+fi
+
+
+#Goooo
+case "${1}" in
+
+  'install')
+    neutral_msg "Installing FFmpeg."
+    brew install ffmpeg --with-libvpx --with-libvorbis
+    ;;
+
+  'uninstall')
+    neutral_msg "Uninstalling FFmpeg."
+    brew rmtree ffmpeg
+    ;;
+
+  'rebuild')
+    $0 uninstall
+    sleep 1
+    $0 install
+    ;;
+
+esac
+
