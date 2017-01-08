@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#@file
+#Template for the other scripts
+
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
+
+
+# Settings/Vars
+
+
+# Checks
+
+
+#Goooo
+case "${1}" in
+
+  'install')
+    ;;
+
+  'uninstall')
+    ;;
+
+  'rebuild')
+    $0 uninstall
+    sleep 1
+    $0 install
+    ;;
+
+esac
+
