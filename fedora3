@@ -12,14 +12,19 @@
 # This setup does not support SSL
 
 
-# Libs
-source ${HOME}/.bash_functions/msgs
+# Boots and boots
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
 
 
 # Settings/Vars
 v="3.8.1"
 filename="fcrepo-installer-${v}.jar"
-tomcat_location="/Library/Tomcat"
 fedora_location="${tomcat_location}/fedora3"
 
 
@@ -29,59 +34,62 @@ if [ ! -d ${tomcat_location}/webapps ]; then
   exit 1
 fi
 
-# Checks if tomcat is already running, and if so turns it off.
-if [ $(tc running) -eq 1 ]; then
-  tc stop
-  sleep 1
-fi
 
+# All actions in this script require tomcat to stop
+tomcat stop
 
-# Uninstall
-if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  good_msg "Uninstalling Fedora 3"
+#Goooo
+case "${1}" in
 
-  # Remove the environment vars
-  sed -i .bak '/fd3/d' ${HOME}/.bash_profile
+  'install')
+    neutral_msg "Installing Fedora 3"
 
-  # Remove all the wars
-  wars=('fedora' 'fedora-demo' 'fop' 'imagemanip' 'saxon')
-  for war_file in "${wars[@]}"
-  do
-    if [ -f ${tomcat_location}/webapps/${war_file}.war ]; then
-      rm -r ${tomcat_location}/webapps/${war_file}
-      rm ${tomcat_location}/webapps/${war_file}.war
+    # Get the installer
+    curl -OL http://downloads.sourceforge.net/fedora-commons/${filename}
+    java -jar ${filename} ${this_dir}/config/install.properties
+
+    # Add some environment variables
+    if [ -z "${FEDORA_HOME}" ] || [ "${1}" == "rebuild" ]; then
+      echo "# Fedora 3 Stuff (fd3)" >> ${HOME}/.bash_profile
+      echo "export CATALINA_HOME=${tomcat_location} #(fd3)" >> ${HOME}/.bash_profile
+      echo 'export FEDORA_HOME=$CATALINA_HOME/fedora3 #(fd3)' >> ${HOME}/.bash_profile
+      echo 'export PATH=$PATH:$FEDORA_HOME/server/bin:$FEDORA_HOME/client/bin #(fd3)' >> ${HOME}/.bash_profile
     fi
-  done
 
-  # Remove FEDORA_HOME
-  rm -r ${fedora_location}
+    # Clean up the cruft
+    rm ${filename}
 
-  # If destroying, stop here.
-  if [ "${1}" == "destroy" ]; then
-    exit 0
-  fi
-fi
+    # Start it up
+    tomcat start
 
-# Install
-good_msg "Installing Fedora 3"
+    echo -e "\nYou probably need to close and reopen your terminal, or source your .bash_profile\n"
+    ;;
 
-# Get the installer
-curl -OL http://downloads.sourceforge.net/fedora-commons/${filename}
-java -jar ${filename} config/install.properties
+  'uninstall')
+    neutral_msg "Uninstalling Fedora 3"
 
-# Add some environment variables
-if [ -z "${FEDORA_HOME}" ] || [ "${1}" == "rebuild" ]; then
-  echo "# Fedora 3 Stuff (fd3)" >> ${HOME}/.bash_profile
-  echo "export CATALINA_HOME=${tomcat_location} #(fd3)" >> ${HOME}/.bash_profile
-  echo 'export FEDORA_HOME=$CATALINA_HOME/fedora3 #(fd3)' >> ${HOME}/.bash_profile
-  echo 'export PATH=$PATH:$FEDORA_HOME/server/bin:$FEDORA_HOME/client/bin #(fd3)' >> ${HOME}/.bash_profile
-fi
+    # Remove the environment vars
+    sed -i .bak '/fd3/d' ${HOME}/.bash_profile
 
-# Clean up the cruft
-rm ${filename}
+    # Remove all the wars
+    wars=('fedora' 'fedora-demo' 'fop' 'imagemanip' 'saxon')
+    for war_file in "${wars[@]}"
+    do
+      if [ -f ${tomcat_location}/webapps/${war_file}.war ]; then
+        rm -r ${tomcat_location}/webapps/${war_file}
+        rm ${tomcat_location}/webapps/${war_file}.war
+      fi
+    done
 
-# Start it up
-tc start
+    # Remove FEDORA_HOME
+    rm -r ${fedora_location}
+    ;;
 
-echo -e "\nYou probably need to close and reopen your terminal, or source your .bash_profile\n"
+  'rebuild')
+    $0 uninstall
+    sleep 1
+    $0 install
+    ;;
+
+esac
 
