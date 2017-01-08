@@ -3,13 +3,18 @@
 #@file
 #Installs/Uninstalls Fedora Repository 4
 
-# Libs
-source ${HOME}/.bash_functions/msgs
+# Stainglass boots
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
 
 # Settings/Vars
 v="4.6.0"
 fed_name="fedora4" #This will be the ending of the url
-tomcat_location="/Library/Tomcat"
 data_dir="${tomcat_location}/.fedora4-data" #The data directory where caching and junk is stored.
 
 
@@ -19,40 +24,41 @@ if [ ! -d ${tomcat_location}/webapps ]; then
   exit 1
 fi
 
-# Check if tomcat is running and if so, stop it.
-tc stop
-sleep 1
+# All actions in this script require tomcat to stop
+tomcat stop
 
+#Goooo
+case "${1}" in
 
-# Uninstall Fedora
-if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  good_msg "Uninstalling Fedora"
+  'install')
+    good_msg "Installing Fedora 4"
 
-  rm -r ${tomcat_location}/webapps/${fed_name}
-  rm ${tomcat_location}/webapps/${fed_name}.war
+    curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
+    mv ${fed_name}.war ${tomcat_location}/webapps
 
-  #Remove the data directory
-  rm -r ${data_dir}
-  sed -i '' '/fedora4-data/d' ${tomcat_location}/bin/setenv.sh
+    # Set up the data directory
+    mkdir ${data_dir}
+    echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.modeshape.configuration=classpath:/config/minimal-default/repository.json -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
 
-  # If destroying, stop here.
-  if [ "${1}" == "destroy" ]; then
-    exit 0
-  fi
-fi
+    tomcat start
+    ;;
 
+  'uninstall')
+    neutral_msg "Uninstalling Fedora"
 
-# Install Fedora
-good_msg "Installing Fedora 4"
+    rm -r ${tomcat_location}/webapps/${fed_name}
+    rm ${tomcat_location}/webapps/${fed_name}.war
 
-curl -Lo ${fed_name}.war https://github.com/fcrepo4/fcrepo4/releases/download/fcrepo-${v}/fcrepo-webapp-${v}.war
-mv ${fed_name}.war ${tomcat_location}/webapps
+    #Remove the data directory
+    rm -r ${data_dir}
+    sed -i '' '/fedora4-data/d' ${tomcat_location}/bin/setenv.sh
+    ;;
 
-# Set up the data directory
-mkdir ${data_dir}
-echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.modeshape.configuration=classpath:/config/minimal-default/repository.json -Dfcrepo.home='${data_dir}'"' >> ${tomcat_location}/bin/setenv.sh
+  'rebuild')
+    $0 uninstall
+    sleep 1
+    $0 install
+    ;;
 
-
-# Fire it up!
-tc start
+esac
 
