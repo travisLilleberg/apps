@@ -3,13 +3,24 @@
 #@file
 # Manages Solr 6
 
+# Strappin that boot
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
+
+
 # Settings/Vars
 minor_v="3.0"
 v=6.${minor_v}
 filename="solr-${v}"
 solr_home="/usr/local/solr"
 solr_script="${solr_home}/bin/solr"
-pid_file="${HOME}/.solr_pid"
+pid_file="${HOME}/.solr.pid"
+
 
 #Goooo
 case "${1}" in
@@ -25,7 +36,7 @@ case "${1}" in
 
   'start')
     if [ $($0 running) -eq 0 ]; then
-      echo -e "\nStarting Solr\n"
+      neutral_msg "Starting Solr"
       ${solr_script} start
       echo "${!}" > ${pid_file}
     fi
@@ -33,7 +44,7 @@ case "${1}" in
 
   'stop')
     if [ $($0 running) -eq 1 ]; then
-      echo -e "\nStopping Solr\n"
+      neutral_msg "Stopping Solr"
       ${solr_script} stop
       rm ${pid_file}
     fi
@@ -47,16 +58,16 @@ case "${1}" in
 
   'install')
     if [ -d "${solr_home}" ]; then
-      echo -e "\n${solr_home} already exists!\n"
+      bad_msg "${solr_home} already exists!"
       exit 1
     fi
 
-    echo -e "\nInstalling Solr 6\n"
+    neutral_msg "Installing Solr 6"
 
     # Get the files
     curl -fOL https://archive.apache.org/dist/lucene/solr/${v}/${filename}.tgz
     if [ ${?} -gt 0 ]; then
-      echo -e "\nFailed to retrieve Solr from the web.\n"
+      neutral_msg "Failed to retrieve Solr from the web."
       exit 1
     fi
 
@@ -71,16 +82,17 @@ case "${1}" in
     $0 start
     ;;
 
-  'destroy')
-    echo -e "\nUninstalling Solr 6.\n"
+  'uninstall')
+    neutral_msg "Uninstalling Solr 6."
 
     $0 stop
+    sleep 3
     rm -r ${solr_home}
     ;;
 
   'rebuild')
-    $0 destroy
-    sleep 3
+    $0 uninstall
+    sleep 1
     $0 install
     ;;
 
