@@ -52,12 +52,12 @@ case "${1}" in
     if [ $($0 running) -eq 1 ]; then
       neutral_msg "Stopping Tomcat"
       ${tomcat_location}/bin/shutdown.sh
+      sleep 3
     fi
     ;;
 
   'restart')
     $0 stop
-    sleep 3
     $0 start
     ;;
 
@@ -93,7 +93,6 @@ case "${1}" in
     neutral_msg "Uninstalling Tomcat."
 
     $0 stop
-    sleep 3
 
     sudo rm ${tomcat_location}
     rm -r /usr/local/${t_dir}
@@ -101,7 +100,7 @@ case "${1}" in
 
   'rebuild')
     $0 uninstall
-    sleep 3
+    sleep 1
     $0 install
     ;;
 esac
