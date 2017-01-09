@@ -3,7 +3,7 @@
 #@file
 # Manages Solr 6
 
-# Strappin that boot
+# Libs
 this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 if [ -f ${this_dir}/bootstrap.sh ]; then
   source ${this_dir}/bootstrap.sh
@@ -19,7 +19,155 @@ v=6.${minor_v}
 filename="solr-${v}"
 solr_home="/usr/local/solr"
 solr_script="${solr_home}/bin/solr"
+core_home="${solr_home}/server/solr"
 pid_file="${HOME}/.solr.pid"
+
+
+# Functions
+function is_running {
+  if [ -f "${pid_file}" ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+function start {
+  if [ $(is_running) == "0" ]; then
+    good_msg "Starting Solr"
+    ${solr_script} start
+    echo "${!}" > ${pid_file}
+  fi
+}
+
+function stop {
+  if [ $(is_running) == "1" ]; then
+    good_msg "Stopping Solr"
+    ${solr_script} stop
+    rm ${pid_file}
+    sleep 3
+  fi
+}
+
+function restart {
+  stop
+  sleep 1
+  start
+}
+
+function install {
+  if [ -d "${solr_home}" ]; then
+    bad_msg "${solr_home} already exists!"
+    exit 1
+  fi
+
+  good_msg "Installing Solr 6"
+
+  # Get the files
+  curl -fOL https://archive.apache.org/dist/lucene/solr/${v}/${filename}.tgz
+  if [ ${?} -gt 0 ]; then
+    good_msg "Failed to retrieve Solr from the web."
+    exit 1
+  fi
+
+  tar -xf ${filename}.tgz
+  mv ${filename} ${solr_home}
+  rm ${filename}.tgz
+
+  start
+}
+
+function uninstall {
+  good_msg "Uninstalling Solr 6."
+
+  stop
+  rm -r ${solr_home}
+}
+
+function create {
+  if [ -z "${1}" ]; then
+    bad_msg "Please provide a core name and a conf directory."
+    exit 1
+  fi
+
+  core=${core_home}/${1}
+  if [ -e ${core} ]; then
+    bad_msg "${core} already exists as a Solr core."
+    exit 1
+  fi
+
+  solr_conf=${2}
+  if [ -z ${solr_conf} ]; then
+    bad_msg "Please provide conf folder as third param."
+    exit 1
+  fi
+  if [ ! -d ${solr_conf} ]; then
+    bad_msg "${solr_conf} is not a directory."
+    exit 1
+  fi
+
+  good_msg "Creating the new Solr core."
+
+  ${solr_script} create -c ${1}
+  rm -r ${core}/conf/*
+  cp -r ${solr_conf}/* ${core}/conf
+  sed -i '' 's:units="degrees":distanceUnits="degrees":g' ${core}/conf/schema.xml
+
+  restart
+}
+
+function destroy {
+  if [ -z "${1}" ]; then
+    bad_msg "Please provide a core name."
+    exit 1
+  fi
+
+  core=${core_home}/${1}
+  if [ ! -d ${core} ]; then
+    bad_msg "${1} isn't a Solr core."
+    exit 1
+  fi
+
+  good_msg "Destroying the ${1} Solr core."
+  ${solr_script} delete -c ${1}
+  restart
+}
+
+function clear {
+  if [ -z "${1}" ]; then
+    bad_msg "Please provide a core name."
+    exit 1
+  fi
+
+  core=${core_home}/${1}
+  if [ ! -d ${core} ]; then
+    bad_msg "${1} isn't a Solr core."
+    exit 1
+  fi
+
+  good_msg "Clearing ${1}."
+
+  solr_url="localhost:8983/solr/${1}"
+  target="${solr_url}/update?stream.body=<delete><query>*:*</query></delete>&commit=true"
+  curl $target
+}
+
+function list {
+  ignore="configsets"
+
+  neutral_msg "Current Solr cores: "
+  for this_dir in $(find $core_home -type d -maxdepth 1)
+  do
+    if [ "${this_dir}" == "${core_home}" ]; then
+      continue
+    fi
+    rel_dir=${this_dir#$core_home/}
+    if [ "${ignore}" == "${ignore/$rel_dir/}" ]; then
+      echo "${rel_dir}"
+    fi
+  done
+  echo
+}
 
 
 #Goooo
@@ -27,74 +175,48 @@ case "${1}" in
 
   # Is Solr running?
   'running')
-    if [ -f "${pid_file}" ]; then
-      echo 1
-    else
-      echo 0
-    fi
+    is_running
     ;;
 
   'start')
-    if [ $($0 running) -eq 0 ]; then
-      neutral_msg "Starting Solr"
-      ${solr_script} start
-      echo "${!}" > ${pid_file}
-    fi
+    start
     ;;
 
   'stop')
-    if [ $($0 running) -eq 1 ]; then
-      neutral_msg "Stopping Solr"
-      ${solr_script} stop
-      rm ${pid_file}
-    fi
+    stop
     ;;
 
   'restart')
-    $0 stop
-    sleep 3
-    $0 start
+    restart
     ;;
 
   'install')
-    if [ -d "${solr_home}" ]; then
-      bad_msg "${solr_home} already exists!"
-      exit 1
-    fi
-
-    neutral_msg "Installing Solr 6"
-
-    # Get the files
-    curl -fOL https://archive.apache.org/dist/lucene/solr/${v}/${filename}.tgz
-    if [ ${?} -gt 0 ]; then
-      neutral_msg "Failed to retrieve Solr from the web."
-      exit 1
-    fi
-
-    tar -xf ${filename}.tgz
-
-    # Add solr home
-    mv ${filename} ${solr_home}
-
-    # Remove cruft
-    rm ${filename}.tgz
-
-    $0 start
+    install
     ;;
 
   'uninstall')
-    neutral_msg "Uninstalling Solr 6."
-
-    $0 stop
-    sleep 3
-    rm -r ${solr_home}
+    uninstall
     ;;
 
   'rebuild')
-    $0 uninstall
-    sleep 1
-    $0 install
+    uninstall
+    install
     ;;
 
+  'create')
+    create $2 $3
+    ;;
+
+  'destroy')
+    destroy $2
+    ;;
+
+  'list')
+    list
+    ;;
+
+  'clear')
+    clear $2
+    ;;
 esac
 
