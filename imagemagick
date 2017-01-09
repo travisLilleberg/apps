@@ -3,24 +3,40 @@
 #@file
 #Installs/Uninstalls ImageMagick
 
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
+
+
 # Checks
 if [ -z $(which brew) ]; then
   echo -e "\nYou need to install Homebrew first.\n"
   exit 1
 fi
 
-# Uninstall
-if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  echo -e "\nUninstalling ImageMagick.\n"
-  brew rmtree imagemagick
 
-  # If destroying, stop here.
-  if [ "${1}" == "destroy" ]; then
-    exit 0
-  fi
-fi
+#Goooo
+case "${1}" in
 
-# Install
-echo -e "\nInstalling ImageMagick.\n"
-brew install imagemagick --with-libtiff
+  'install')
+    neutral_msg "Installing ImageMagick."
+    brew install imagemagick --with-libtiff
+    ;;
+
+  'uninstall')
+    neutral_msg "Uninstalling ImageMagick."
+    brew rmtree imagemagick
+    ;;
+
+  'rebuild')
+    $0 uninstall
+    sleep 1
+    $0 install
+    ;;
+
+esac
 

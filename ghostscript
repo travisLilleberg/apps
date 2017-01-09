@@ -3,8 +3,14 @@
 #@file
 #Installs/Uninstalls GhostScript
 
-# Libs
-source ${HOME}/.bash_functions/msgs
+this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+if [ -f ${this_dir}/bootstrap.sh ]; then
+  source ${this_dir}/bootstrap.sh
+else
+  echo -e "\nCouldn't find bootstrap.sh! Ooooh noooo\n"
+  exit 1
+fi
+
 
 # Checks
 if [ -z $(which brew) ]; then
@@ -12,18 +18,25 @@ if [ -z $(which brew) ]; then
   exit 1
 fi
 
-# Uninstall
-if [ "${1}" == "destroy" ] || [ "${1}" == "rebuild" ]; then
-  good_msg "Uninstalling GhostScript"
-  brew rmtree ghostscript
 
-  # If destroying, stop here.
-  if [ "${1}" == "destroy" ]; then
-    exit 0
-  fi
-fi
+#Goooo
+case "${1}" in
 
-# Install
-good_msg "Installing GhostScript"
-brew install ghostscript
+  'install')
+    neutral_msg "Installing GhostScript"
+    brew install ghostscript
+    ;;
+
+  'uninstall')
+    neutral_msg "Uninstalling GhostScript"
+    brew rmtree ghostscript
+    ;;
+
+  'rebuild')
+    $0 uninstall
+    sleep 1
+    $0 install
+    ;;
+
+esac
 
