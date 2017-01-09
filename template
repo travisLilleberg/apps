@@ -17,20 +17,54 @@ fi
 
 # Checks
 
+# Functions
+function is_running {
+}
+
+function start {
+}
+
+function stop {
+}
+
+function install {
+}
+
+function uninstall {
+}
+
 
 #Goooo
 case "${1}" in
 
+  'running')
+    is_running
+    ;;
+
+  'start')
+    start
+    ;;
+
+  'stop')
+    stop
+    ;;
+
+  'restart')
+    stop
+    start
+    ;;
+
   'install')
+    install
     ;;
 
   'uninstall')
+    uninstall
     ;;
 
   'rebuild')
-    $0 uninstall
-    sleep 1
-    $0 install
+    uninstall
+    install
     ;;
 
 esac
