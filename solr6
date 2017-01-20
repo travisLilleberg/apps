@@ -92,7 +92,7 @@ function create {
 
   core=${core_home}/${1}
   if [ -e ${core} ]; then
-    bad_msg "${core} already exists as a Solr core."
+    bad_msg "${1} already exists as a Solr core."
     exit 1
   fi
 
@@ -130,6 +130,7 @@ function destroy {
 
   good_msg "Destroying the ${1} Solr core."
   ${solr_script} delete -c ${1}
+
   restart
 }
 
