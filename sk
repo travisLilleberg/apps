@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #@file
-#Installs/Uninstalls Redis
+# Starts/Stops Sidekiq
+# Had to abbreviate to not overwrite actual sidekiq command.
 
 # Libs
 this_dir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
@@ -13,14 +14,7 @@ else
 fi
 
 # Settings/Vars
-conf="/usr/local/etc/redis.conf"
-pid_file="${HOME}/.redis.pid"
-
-# Checks
-if [ -z $(which brew) ]; then
-  bad_msg "You need to install Homebrew first."
-  exit 1
-fi
+pid_file="${HOME}/.sidekiq.pid"
 
 # Functions
 function is_running {
@@ -32,19 +26,30 @@ function is_running {
 }
 
 function start {
+  rake -n >/dev/null 2>/dev/null
+  if [ $? -gt 0 ]; then
+    bad_msg "You're not in a Rails project."
+    exit 1
+  fi
+
+  if [ $(redis running) == "0" ]; then
+    neutral_msg "Starting Redis first . . ."
+    redis start
+    sleep 3
+  fi
+
   if [ $(is_running) == "0" ]; then
-    good_msg "Starting Redis"
-    nohup redis-server ${conf} &
-    echo "${!}" > ${pid_file}
+    good_msg "Starting Sidekiq"
+    bundle exec sidekiq -d -l tmp/sidekiq.log -P ${pid_file}
   fi
 }
 
 function stop {
   if [ $(is_running) == "1" ]; then
-    good_msg "Stopping Redis"
+    good_msg "Stopping Sidekiq"
     kill $(head -n 1 ${pid_file})
     rm ${pid_file}
-    sleep 3
+    sleep 2
   fi
 }
 
@@ -52,16 +57,6 @@ function restart {
   stop
   sleep 1
   start
-}
-
-function install {
-  good_msg "Installing Redis."
-  brew install redis
-}
-
-function uninstall {
-  good_msg "Uninstalling Redis."
-  brew rmtree redis
 }
 
 #Goooo
@@ -81,18 +76,4 @@ case "${1}" in
   'restart')
     restart
     ;;
-
-  'install')
-    install
-    ;;
-
-  'uninstall')
-    uninstall
-    ;;
-
-  'rebuild')
-    uninstall
-    install
-    ;;
 esac
-

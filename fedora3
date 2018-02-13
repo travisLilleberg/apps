@@ -35,61 +35,70 @@ if [ ! -d ${tomcat_location}/webapps ]; then
 fi
 
 
+# Functions
+function install {
+  neutral_msg "Installing Fedora 3"
+
+  # Get the installer
+  curl -OL http://downloads.sourceforge.net/fedora-commons/${filename}
+  java -jar ${filename} ${this_dir}/config/install.properties
+
+  # Add some environment variables
+  if [ -z "${FEDORA_HOME}" ] || [ "${1}" == "rebuild" ]; then
+    echo "# Fedora 3 Stuff (fd3)" >> ${HOME}/.bash_profile
+    echo "export CATALINA_HOME=${tomcat_location} #(fd3)" >> ${HOME}/.bash_profile
+    echo 'export FEDORA_HOME=$CATALINA_HOME/fedora3 #(fd3)' >> ${HOME}/.bash_profile
+    echo 'export PATH=$PATH:$FEDORA_HOME/server/bin:$FEDORA_HOME/client/bin #(fd3)' >> ${HOME}/.bash_profile
+  fi
+
+  # Clean up the cruft
+  rm ${filename}
+
+  # Start it up
+  tomcat start
+
+  echo -e "\nYou probably need to close and reopen your terminal, or source your .bash_profile\n"
+}
+
+function uninstall {
+  neutral_msg "Uninstalling Fedora 3"
+
+  # Remove the environment vars
+  sed -i .bak '/fd3/d' ${HOME}/.bash_profile
+
+  # Remove all the wars
+  wars=('fedora' 'fedora-demo' 'fop' 'imagemanip' 'saxon')
+  for war_file in "${wars[@]}"
+  do
+    if [ -f ${tomcat_location}/webapps/${war_file}.war ]; then
+      rm -r ${tomcat_location}/webapps/${war_file}
+      rm ${tomcat_location}/webapps/${war_file}.war
+    fi
+  done
+
+  # Remove FEDORA_HOME
+  rm -r ${fedora_location}
+}
+
+
+#Goooo
 # All actions in this script require tomcat to stop
 tomcat stop
 
-#Goooo
 case "${1}" in
 
   'install')
-    neutral_msg "Installing Fedora 3"
-
-    # Get the installer
-    curl -OL http://downloads.sourceforge.net/fedora-commons/${filename}
-    java -jar ${filename} ${this_dir}/config/install.properties
-
-    # Add some environment variables
-    if [ -z "${FEDORA_HOME}" ] || [ "${1}" == "rebuild" ]; then
-      echo "# Fedora 3 Stuff (fd3)" >> ${HOME}/.bash_profile
-      echo "export CATALINA_HOME=${tomcat_location} #(fd3)" >> ${HOME}/.bash_profile
-      echo 'export FEDORA_HOME=$CATALINA_HOME/fedora3 #(fd3)' >> ${HOME}/.bash_profile
-      echo 'export PATH=$PATH:$FEDORA_HOME/server/bin:$FEDORA_HOME/client/bin #(fd3)' >> ${HOME}/.bash_profile
-    fi
-
-    # Clean up the cruft
-    rm ${filename}
-
-    # Start it up
-    tomcat start
-
-    echo -e "\nYou probably need to close and reopen your terminal, or source your .bash_profile\n"
+    install
     ;;
 
   'uninstall')
-    neutral_msg "Uninstalling Fedora 3"
-
-    # Remove the environment vars
-    sed -i .bak '/fd3/d' ${HOME}/.bash_profile
-
-    # Remove all the wars
-    wars=('fedora' 'fedora-demo' 'fop' 'imagemanip' 'saxon')
-    for war_file in "${wars[@]}"
-    do
-      if [ -f ${tomcat_location}/webapps/${war_file}.war ]; then
-        rm -r ${tomcat_location}/webapps/${war_file}
-        rm ${tomcat_location}/webapps/${war_file}.war
-      fi
-    done
-
-    # Remove FEDORA_HOME
-    rm -r ${fedora_location}
+    uninstall
     ;;
 
   'rebuild')
-    $0 uninstall
+    uninstall
     sleep 1
-    $0 install
+    install
     ;;
-
 esac
 
