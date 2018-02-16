@@ -175,7 +175,7 @@ function list {
 case "${1}" in
 
   # Is Solr running?
-  'running')
+  'is_running')
     is_running
     ;;
 
