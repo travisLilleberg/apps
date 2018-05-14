@@ -24,7 +24,7 @@ case "${1}" in
 
   'install')
     neutral_msg "Installing ImageMagick."
-    brew install imagemagick --with-libtiff
+    brew install imagemagick --with-tiff --with-ghostscript --with-openjpeg
     ;;
 
   'uninstall')

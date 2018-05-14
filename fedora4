@@ -46,10 +46,13 @@ case "${1}" in
   'uninstall')
     neutral_msg "Uninstalling Fedora"
 
+    echo "Deleting ${tomcat_location}/webapps/${fed_name}"
     rm -r ${tomcat_location}/webapps/${fed_name}
+    echo "Deleting ${tomcat_location}/webapps/${fed_name}.war"
     rm ${tomcat_location}/webapps/${fed_name}.war
 
     #Remove the data directory
+    echo "Deleting ${data_dir}"
     rm -r ${data_dir}
     sed -i '' '/fedora4-data/d' ${tomcat_location}/bin/setenv.sh
     ;;
